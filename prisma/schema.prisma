@@ -1,0 +1,218 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model tbl_botao_apoio {
+  id             Int            @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  midia          String         @db.VarChar(300)
+  id_crianca     Int            @db.UnsignedInt
+  id_tipo_midia  Int            @db.UnsignedInt
+  tbl_crianca    tbl_crianca    @relation(fields: [id_crianca], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Botao_Apoio_Crianca")
+  tbl_tipo_midia tbl_tipo_midia @relation(fields: [id_tipo_midia], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Botao_Apoio_Tipo_Midia")
+
+  @@index([id_crianca], map: "FK_Botao_Apoio_Crianca")
+  @@index([id_tipo_midia], map: "FK_Botao_Apoio_Tipo_Midia")
+}
+
+model tbl_crianca {
+  id                    Int                     @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  nome                  String                  @db.VarChar(100)
+  foto                  String?                 @db.VarChar(300)
+  data_nascimento       DateTime                @db.Date
+  id_genero             Int                     @db.UnsignedInt
+  id_nivel_autismo      Int                     @db.UnsignedInt
+  id_responsavel        Int                     @db.UnsignedInt
+  tbl_genero            tbl_genero              @relation(fields: [id_genero], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Genero_Crianca")
+  tbl_nivel_autismo     tbl_nivel_autismo       @relation(fields: [id_nivel_autismo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Nivel_Autismo_Crianca")
+  tbl_responsavel       tbl_responsavel         @relation(fields: [id_responsavel], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Responsavel_Crianca")
+  tbl_botao_apoio       tbl_botao_apoio[]
+  tbl_crianca_tarefa    tbl_crianca_tarefa[]
+  tbl_medalha_crianca   tbl_medalha_crianca[]
+  tbl_realizacao_tarefa tbl_realizacao_tarefa[]
+  tbl_relatorio         tbl_relatorio[]
+  tbl_restricao         tbl_restricao[]
+
+  @@index([id_genero], map: "FK_Genero_Crianca")
+  @@index([id_nivel_autismo], map: "FK_Nivel_Autismo_Crianca")
+  @@index([id_responsavel], map: "FK_Responsavel_Crianca")
+}
+
+model tbl_crianca_tarefa {
+  id          Int         @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  id_crianca  Int         @db.UnsignedInt
+  id_tarefa   Int         @db.UnsignedInt
+  tbl_crianca tbl_crianca @relation(fields: [id_crianca], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Crianca_Crianca_Tarefa")
+  tbl_tarefa  tbl_tarefa  @relation(fields: [id_tarefa], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Tarefa_Crianca_Tarefa")
+
+  @@index([id_crianca], map: "FK_Crianca_Crianca_Tarefa")
+  @@index([id_tarefa], map: "FK_Tarefa_Crianca_Tarefa")
+}
+
+model tbl_dia_semana {
+  id                    Int                     @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  dia                   String                  @db.VarChar(45)
+  sigla                 String                  @db.VarChar(3)
+  numero                Int
+  tbl_tarefa_dia_semana tbl_tarefa_dia_semana[]
+}
+
+model tbl_genero {
+  id          Int           @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  genero      String        @db.VarChar(45)
+  sigla       String        @db.VarChar(2)
+  tbl_crianca tbl_crianca[]
+}
+
+model tbl_icone {
+  id         Int          @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  icone      String       @db.VarChar(300)
+  titulo     String       @db.VarChar(100)
+  tbl_tarefa tbl_tarefa[]
+}
+
+model tbl_medalha {
+  id                  Int                   @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  nome                String                @db.VarChar(80)
+  criterio            Int
+  descricao           String?               @db.VarChar(100)
+  medalha             String                @db.VarChar(300)
+  tbl_medalha_crianca tbl_medalha_crianca[]
+}
+
+model tbl_medalha_crianca {
+  id          Int         @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  id_medalha  Int         @db.UnsignedInt
+  id_crianca  Int         @db.UnsignedInt
+  tbl_crianca tbl_crianca @relation(fields: [id_crianca], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Crianca_Medalha_Crianca")
+  tbl_medalha tbl_medalha @relation(fields: [id_medalha], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Medalha_Medalha_Crianca")
+
+  @@index([id_crianca], map: "FK_Crianca_Medalha_Crianca")
+  @@index([id_medalha], map: "FK_Medalha_Medalha_Crianca")
+}
+
+model tbl_mini_jogo {
+  id                   Int                    @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  nome                 String                 @db.VarChar(80)
+  descricao            String?                @db.Text
+  icone                String                 @db.VarChar(300)
+  tbl_relatorio        tbl_relatorio[]
+  tbl_restricao        tbl_restricao[]
+  tbl_situacao_escolha tbl_situacao_escolha[]
+}
+
+model tbl_nivel_autismo {
+  id          Int           @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  nivel       String        @db.VarChar(1)
+  descricao   String        @db.VarChar(100)
+  tbl_crianca tbl_crianca[]
+}
+
+model tbl_passo {
+  id                   Int                  @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  imagem               String?              @db.VarChar(300)
+  texto                String?              @db.VarChar(100)
+  cor                  String?              @db.VarChar(10)
+  passo_correto        Boolean
+  descricao            String               @db.VarChar(100)
+  id_situacao_escolha  Int                  @db.UnsignedInt
+  tbl_situacao_escolha tbl_situacao_escolha @relation(fields: [id_situacao_escolha], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Situacao_Escolha_Passo")
+
+  @@index([id_situacao_escolha], map: "FK_Situacao_Escolha_Passo")
+}
+
+model tbl_realizacao_tarefa {
+  id          Int         @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  data        DateTime    @db.DateTime(0)
+  id_tarefa   Int         @db.UnsignedInt
+  id_crianca  Int         @db.UnsignedInt
+  tbl_crianca tbl_crianca @relation(fields: [id_crianca], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Crianca_Realizacao_Tarefa")
+  tbl_tarefa  tbl_tarefa  @relation(fields: [id_tarefa], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Tarefa_Realizacao_Tarefa")
+
+  @@index([id_crianca], map: "FK_Crianca_Realizacao_Tarefa")
+  @@index([id_tarefa], map: "FK_Tarefa_Realizacao_Tarefa")
+}
+
+model tbl_relatorio {
+  id            Int           @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  erros         Int
+  acertos       Int
+  data          DateTime      @db.DateTime(0)
+  id_mini_jogo  Int           @db.UnsignedInt
+  id_crianca    Int           @db.UnsignedInt
+  tbl_crianca   tbl_crianca   @relation(fields: [id_crianca], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Crianca_Relatorio")
+  tbl_mini_jogo tbl_mini_jogo @relation(fields: [id_mini_jogo], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Mini_Jogo_Relatorio")
+
+  @@index([id_crianca], map: "FK_Crianca_Relatorio")
+  @@index([id_mini_jogo], map: "FK_Mini_Jogo_Relatorio")
+}
+
+model tbl_responsavel {
+  id          Int           @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  nome        String        @db.VarChar(100)
+  telefone    String?       @db.VarChar(20)
+  email       String        @unique(map: "email_UNIQUE") @db.VarChar(200)
+  senha       String        @db.VarChar(64)
+  tbl_crianca tbl_crianca[]
+}
+
+model tbl_restricao {
+  id            Int           @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  id_mini_jogo  Int           @db.UnsignedInt
+  id_crianca    Int           @db.UnsignedInt
+  tbl_crianca   tbl_crianca   @relation(fields: [id_crianca], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Crianca_Restricao")
+  tbl_mini_jogo tbl_mini_jogo @relation(fields: [id_mini_jogo], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Mini_Jogo_Restricao")
+
+  @@index([id_crianca], map: "FK_Crianca_Restricao")
+  @@index([id_mini_jogo], map: "FK_Mini_Jogo_Restricao")
+}
+
+model tbl_situacao_escolha {
+  id             Int           @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  ordem          Int
+  dialogo        String        @db.VarChar(100)
+  imagem_exemplo String?       @db.VarChar(300)
+  imagem_fundo   String?       @db.VarChar(300)
+  cor_fundo      String        @db.VarChar(10)
+  id_mini_jogo   Int           @db.UnsignedInt
+  tbl_mini_jogo  tbl_mini_jogo @relation(fields: [id_mini_jogo], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Mini_Jogo_Passo")
+  tbl_passo      tbl_passo[]
+
+  @@index([id_mini_jogo], map: "FK_Mini_Jogo_Passo")
+}
+
+model tbl_tarefa {
+  id                    Int                     @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  horario               String                  @db.VarChar(10)
+  titulo                String?                 @db.VarChar(45)
+  id_icone              Int                     @db.UnsignedInt
+  tbl_icone             tbl_icone               @relation(fields: [id_icone], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Icone_Tarefa")
+  tbl_crianca_tarefa    tbl_crianca_tarefa[]
+  tbl_realizacao_tarefa tbl_realizacao_tarefa[]
+  tbl_tarefa_dia_semana tbl_tarefa_dia_semana[]
+
+  @@index([id_icone], map: "FK_Icone_Tarefa")
+}
+
+model tbl_tarefa_dia_semana {
+  id             Int            @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  id_tarefa      Int            @db.UnsignedInt
+  id_dia_semana  Int            @db.UnsignedInt
+  tbl_dia_semana tbl_dia_semana @relation(fields: [id_dia_semana], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Dia_Semana_Tarefa_Dia_Semana")
+  tbl_tarefa     tbl_tarefa     @relation(fields: [id_tarefa], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Tarefa_Tarefa_Dia_Semana")
+
+  @@index([id_dia_semana], map: "FK_Dia_Semana_Tarefa_Dia_Semana")
+  @@index([id_tarefa], map: "FK_Tarefa_Tarefa_Dia_Semana")
+}
+
+model tbl_tipo_midia {
+  id              Int               @id @unique(map: "id") @default(autoincrement()) @db.UnsignedInt
+  tipo            String            @db.VarChar(45)
+  mimetype        String            @db.VarChar(45)
+  tbl_botao_apoio tbl_botao_apoio[]
+}
